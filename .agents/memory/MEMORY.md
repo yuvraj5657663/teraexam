@@ -1,0 +1,4 @@
+- [OpenAPI multipart uploads](openapi-multipart-uploads.md) — Orval/Zod codegen breaks on binary/multipart bodies; implement upload routes by hand outside the spec.
+- [Drizzle date-string columns vs generated Zod](drizzle-date-vs-zod-coerce.md) — Orval coerces `format: date` to JS `Date`, but `date(mode:"string")` columns need strings; convert before insert/update.
+- [Monorepo package installs](pnpm-monorepo-package-installs.md) — installing into a specific artifact/lib package needs `pnpm --filter @workspace/<pkg> add ...`, not the generic install-package tool (root install fails).
+- [Stale TS project references](stale-ts-project-references.md) — after adding exports to a referenced lib package, run root `pnpm run typecheck` (tsc --build), not just the consuming package's own tsc, or stale dist .d.ts files hide new exports.

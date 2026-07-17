@@ -1,0 +1,1408 @@
+openapi: 3.1.0
+info:
+  # Do not change the title, if the title changes, the import paths will be broken
+  title: Api
+  version: 0.1.0
+  description: TERA EXAM Sarkari exam platform API
+servers:
+  - url: /api
+    description: Base API path
+tags:
+  - name: health
+    description: Health operations
+  - name: auth
+    description: Admin authentication
+  - name: jobs
+    description: Job notifications
+  - name: results
+    description: Result links
+  - name: admit-cards
+    description: Admit card links
+  - name: syllabus
+    description: Syllabus PDFs
+  - name: exam-prep
+    description: Subjects, topics, MCQs, practice sessions
+  - name: scraped-items
+    description: Staged scraper data for admin review
+  - name: uploads
+    description: File uploads
+  - name: home
+    description: Public homepage aggregates
+  - name: admin
+    description: Admin dashboard aggregates
+paths:
+  /healthz:
+    get:
+      operationId: healthCheck
+      tags: [health]
+      summary: Health check
+      description: Returns server health status
+      responses:
+        "200":
+          description: Healthy
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthStatus"
+
+  # ---------------------------------------------------------------------
+  # Auth
+  # ---------------------------------------------------------------------
+  /auth/login:
+    post:
+      operationId: login
+      tags: [auth]
+      summary: Admin login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AdminLoginInput"
+      responses:
+        "200":
+          description: Logged in
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthToken"
+        "401":
+          description: Invalid credentials
+  /auth/me:
+    get:
+      operationId: getMe
+      tags: [auth]
+      summary: Get current admin profile
+      security: [{ bearerAuth: [] }]
+      responses:
+        "200":
+          description: Current admin
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Admin"
+        "401":
+          description: Not authenticated
+
+  # ---------------------------------------------------------------------
+  # Public: home aggregate
+  # ---------------------------------------------------------------------
+  /home/summary:
+    get:
+      operationId: getHomeSummary
+      tags: [home]
+      summary: Homepage aggregate — ticker items and latest published entries
+      responses:
+        "200":
+          description: Home summary
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HomeSummary"
+
+  # ---------------------------------------------------------------------
+  # Public: Jobs
+  # ---------------------------------------------------------------------
+  /jobs:
+    get:
+      operationId: listJobs
+      tags: [jobs]
+      summary: List published jobs
+      parameters:
+        - name: search
+          in: query
+          schema: { type: string }
+      responses:
+        "200":
+          description: Jobs
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/Job" }
+  /jobs/{id}:
+    get:
+      operationId: getJob
+      tags: [jobs]
+      summary: Get a published job
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        "200":
+          description: Job
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Job" }
+        "404":
+          description: Not found
+
+  # ---------------------------------------------------------------------
+  # Public: Results
+  # ---------------------------------------------------------------------
+  /results:
+    get:
+      operationId: listResults
+      tags: [results]
+      summary: List published results
+      parameters:
+        - name: search
+          in: query
+          schema: { type: string }
+      responses:
+        "200":
+          description: Results
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/Result" }
+  /results/{id}:
+    get:
+      operationId: getResult
+      tags: [results]
+      summary: Get a published result
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        "200":
+          description: Result
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Result" }
+        "404":
+          description: Not found
+
+  # ---------------------------------------------------------------------
+  # Public: Admit Cards
+  # ---------------------------------------------------------------------
+  /admit-cards:
+    get:
+      operationId: listAdmitCards
+      tags: [admit-cards]
+      summary: List published admit cards
+      parameters:
+        - name: search
+          in: query
+          schema: { type: string }
+      responses:
+        "200":
+          description: Admit cards
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/AdmitCard" }
+  /admit-cards/{id}:
+    get:
+      operationId: getAdmitCard
+      tags: [admit-cards]
+      summary: Get a published admit card
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        "200":
+          description: Admit card
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AdmitCard" }
+        "404":
+          description: Not found
+
+  # ---------------------------------------------------------------------
+  # Public: Syllabus
+  # ---------------------------------------------------------------------
+  /syllabus:
+    get:
+      operationId: listSyllabus
+      tags: [syllabus]
+      summary: List published syllabus PDFs
+      parameters:
+        - name: search
+          in: query
+          schema: { type: string }
+      responses:
+        "200":
+          description: Syllabus entries
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/Syllabus" }
+  /syllabus/{id}:
+    get:
+      operationId: getSyllabus
+      tags: [syllabus]
+      summary: Get a published syllabus entry
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        "200":
+          description: Syllabus entry
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Syllabus" }
+        "404":
+          description: Not found
+
+  # ---------------------------------------------------------------------
+  # Public: Exam Prep (subjects -> topics -> MCQs)
+  # ---------------------------------------------------------------------
+  /subjects:
+    get:
+      operationId: listSubjects
+      tags: [exam-prep]
+      summary: List subjects
+      responses:
+        "200":
+          description: Subjects
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/Subject" }
+  /subjects/{id}/topics:
+    get:
+      operationId: listTopicsBySubject
+      tags: [exam-prep]
+      summary: List topics for a subject
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        "200":
+          description: Topics
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/Topic" }
+  /topics/{id}/questions:
+    get:
+      operationId: listQuestionsByTopic
+      tags: [exam-prep]
+      summary: List practice questions for a topic (answers withheld)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        "200":
+          description: Practice questions
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/PracticeQuestion" }
+  /topics/{id}/submit:
+    post:
+      operationId: submitTopicAnswers
+      tags: [exam-prep]
+      summary: Submit answers for a topic practice session and get scored results
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SubmitAnswersInput"
+      responses:
+        "200":
+          description: Scored result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SubmitAnswersResult"
+
+  # ---------------------------------------------------------------------
+  # Admin: Jobs
+  # ---------------------------------------------------------------------
+  /admin/jobs:
+    get:
+      operationId: adminListJobs
+      tags: [admin]
+      summary: List all jobs (any status)
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - name: search
+          in: query
+          schema: { type: string }
+        - name: status
+          in: query
+          schema: { $ref: "#/components/schemas/PublishStatus" }
+      responses:
+        "200":
+          description: Jobs
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/Job" }
+    post:
+      operationId: createJob
+      tags: [admin]
+      summary: Create a job notification
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/JobInput" }
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Job" }
+  /admin/jobs/{id}:
+    patch:
+      operationId: updateJob
+      tags: [admin]
+      summary: Update a job (also used for one-click publish via status field)
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/JobUpdate" }
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Job" }
+        "404":
+          description: Not found
+    delete:
+      operationId: deleteJob
+      tags: [admin]
+      summary: Delete a job
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        "204":
+          description: Deleted
+        "404":
+          description: Not found
+
+  # ---------------------------------------------------------------------
+  # Admin: Results
+  # ---------------------------------------------------------------------
+  /admin/results:
+    get:
+      operationId: adminListResults
+      tags: [admin]
+      summary: List all results (any status)
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - name: search
+          in: query
+          schema: { type: string }
+        - name: status
+          in: query
+          schema: { $ref: "#/components/schemas/PublishStatus" }
+      responses:
+        "200":
+          description: Results
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/Result" }
+    post:
+      operationId: createResult
+      tags: [admin]
+      summary: Create a result link
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/ResultInput" }
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Result" }
+  /admin/results/{id}:
+    patch:
+      operationId: updateResult
+      tags: [admin]
+      summary: Update a result (also used for one-click publish via status field)
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/ResultUpdate" }
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Result" }
+        "404":
+          description: Not found
+    delete:
+      operationId: deleteResult
+      tags: [admin]
+      summary: Delete a result
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        "204":
+          description: Deleted
+        "404":
+          description: Not found
+
+  # ---------------------------------------------------------------------
+  # Admin: Admit Cards
+  # ---------------------------------------------------------------------
+  /admin/admit-cards:
+    get:
+      operationId: adminListAdmitCards
+      tags: [admin]
+      summary: List all admit cards (any status)
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - name: search
+          in: query
+          schema: { type: string }
+        - name: status
+          in: query
+          schema: { $ref: "#/components/schemas/PublishStatus" }
+      responses:
+        "200":
+          description: Admit cards
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/AdmitCard" }
+    post:
+      operationId: createAdmitCard
+      tags: [admin]
+      summary: Create an admit card link
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/AdmitCardInput" }
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AdmitCard" }
+  /admin/admit-cards/{id}:
+    patch:
+      operationId: updateAdmitCard
+      tags: [admin]
+      summary: Update an admit card (also used for one-click publish via status field)
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/AdmitCardUpdate" }
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AdmitCard" }
+        "404":
+          description: Not found
+    delete:
+      operationId: deleteAdmitCard
+      tags: [admin]
+      summary: Delete an admit card
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        "204":
+          description: Deleted
+        "404":
+          description: Not found
+
+  # ---------------------------------------------------------------------
+  # Admin: Syllabus
+  # ---------------------------------------------------------------------
+  /admin/syllabus:
+    get:
+      operationId: adminListSyllabus
+      tags: [admin]
+      summary: List all syllabus entries (any status)
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - name: search
+          in: query
+          schema: { type: string }
+        - name: status
+          in: query
+          schema: { $ref: "#/components/schemas/PublishStatus" }
+      responses:
+        "200":
+          description: Syllabus entries
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/Syllabus" }
+    post:
+      operationId: createSyllabus
+      tags: [admin]
+      summary: Create a syllabus entry
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/SyllabusInput" }
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Syllabus" }
+  /admin/syllabus/{id}:
+    patch:
+      operationId: updateSyllabus
+      tags: [admin]
+      summary: Update a syllabus entry (also used for one-click publish via status field)
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/SyllabusUpdate" }
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Syllabus" }
+        "404":
+          description: Not found
+    delete:
+      operationId: deleteSyllabus
+      tags: [admin]
+      summary: Delete a syllabus entry
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        "204":
+          description: Deleted
+        "404":
+          description: Not found
+
+  # ---------------------------------------------------------------------
+  # Admin: Subjects / Topics / Questions (MCQ bank management)
+  # ---------------------------------------------------------------------
+  /admin/subjects:
+    get:
+      operationId: adminListSubjects
+      tags: [admin]
+      summary: List all subjects
+      security: [{ bearerAuth: [] }]
+      responses:
+        "200":
+          description: Subjects
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/Subject" }
+    post:
+      operationId: createSubject
+      tags: [admin]
+      summary: Create a subject
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/SubjectInput" }
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Subject" }
+  /admin/subjects/{id}:
+    patch:
+      operationId: updateSubject
+      tags: [admin]
+      summary: Update a subject
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/SubjectUpdate" }
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Subject" }
+        "404":
+          description: Not found
+    delete:
+      operationId: deleteSubject
+      tags: [admin]
+      summary: Delete a subject
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        "204":
+          description: Deleted
+        "404":
+          description: Not found
+
+  /admin/topics:
+    get:
+      operationId: adminListTopics
+      tags: [admin]
+      summary: List all topics, optionally filtered by subject
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - name: subjectId
+          in: query
+          schema: { type: integer }
+      responses:
+        "200":
+          description: Topics
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/Topic" }
+    post:
+      operationId: createTopic
+      tags: [admin]
+      summary: Create a topic
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/TopicInput" }
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Topic" }
+  /admin/topics/{id}:
+    patch:
+      operationId: updateTopic
+      tags: [admin]
+      summary: Update a topic
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/TopicUpdate" }
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Topic" }
+        "404":
+          description: Not found
+    delete:
+      operationId: deleteTopic
+      tags: [admin]
+      summary: Delete a topic
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        "204":
+          description: Deleted
+        "404":
+          description: Not found
+
+  /admin/questions:
+    get:
+      operationId: adminListQuestions
+      tags: [admin]
+      summary: List all questions (with correct answers), optionally filtered by topic
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - name: topicId
+          in: query
+          schema: { type: integer }
+      responses:
+        "200":
+          description: Questions
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/Question" }
+    post:
+      operationId: createQuestion
+      tags: [admin]
+      summary: Create a question
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/QuestionInput" }
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Question" }
+  /admin/questions/{id}:
+    patch:
+      operationId: updateQuestion
+      tags: [admin]
+      summary: Update a question
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/QuestionUpdate" }
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Question" }
+        "404":
+          description: Not found
+    delete:
+      operationId: deleteQuestion
+      tags: [admin]
+      summary: Delete a question
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        "204":
+          description: Deleted
+        "404":
+          description: Not found
+
+  # ---------------------------------------------------------------------
+  # Admin: Scraped item staging (approve/reject flow)
+  # ---------------------------------------------------------------------
+  /admin/scraped-items:
+    get:
+      operationId: adminListScrapedItems
+      tags: [admin]
+      summary: List staged scraped items
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - name: status
+          in: query
+          schema: { $ref: "#/components/schemas/ScrapedStatus" }
+      responses:
+        "200":
+          description: Scraped items
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/ScrapedItem" }
+    post:
+      operationId: createScrapedItem
+      tags: [admin]
+      summary: Manually add a staged item
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/ScrapedItemInput" }
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ScrapedItem" }
+  /admin/scraped-items/run-scraper:
+    post:
+      operationId: runScraper
+      tags: [admin]
+      summary: Trigger the scraper service and stage any newly found items
+      security: [{ bearerAuth: [] }]
+      responses:
+        "200":
+          description: Newly staged items
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/ScrapedItem" }
+  /admin/scraped-items/{id}/approve:
+    patch:
+      operationId: approveScrapedItem
+      tags: [admin]
+      summary: Approve a staged item — publishes it into the matching live table
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        "200":
+          description: Approved
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ScrapedItem" }
+        "404":
+          description: Not found
+  /admin/scraped-items/{id}/reject:
+    patch:
+      operationId: rejectScrapedItem
+      tags: [admin]
+      summary: Reject a staged item
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        "200":
+          description: Rejected
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ScrapedItem" }
+        "404":
+          description: Not found
+
+  # ---------------------------------------------------------------------
+  # NOTE: File uploads (POST /api/admin/uploads) are implemented directly in
+  # the Express server with multer + Cloudinary and are intentionally NOT
+  # part of this OpenAPI contract — multipart/form-data binary bodies don't
+  # round-trip cleanly through the Zod/react-query codegen in this repo. The
+  # frontend calls that endpoint with a plain fetch() + FormData instead of a
+  # generated hook. See artifacts/api-server/src/routes/uploads.ts.
+  # ---------------------------------------------------------------------
+  # Admin: dashboard aggregate
+  # ---------------------------------------------------------------------
+  /admin/dashboard/summary:
+    get:
+      operationId: getAdminDashboardSummary
+      tags: [admin]
+      summary: Admin dashboard counts and pending review count
+      security: [{ bearerAuth: [] }]
+      responses:
+        "200":
+          description: Dashboard summary
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AdminDashboardSummary" }
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    HealthStatus:
+      type: object
+      properties:
+        status:
+          type: string
+      required:
+        - status
+
+    PublishStatus:
+      type: string
+      enum: [draft, published]
+
+    ScrapedStatus:
+      type: string
+      enum: [pending, approved, rejected]
+
+    ScrapedSuggestedType:
+      type: string
+      enum: [job, result, admit_card]
+
+    # --- Auth -------------------------------------------------------
+    Admin:
+      type: object
+      required: [id, username, createdAt]
+      properties:
+        id: { type: integer }
+        username: { type: string }
+        createdAt: { type: string, format: date-time }
+
+    AdminLoginInput:
+      type: object
+      required: [username, password]
+      properties:
+        username: { type: string, minLength: 1 }
+        password: { type: string, minLength: 1 }
+
+    AuthToken:
+      type: object
+      required: [token, admin]
+      properties:
+        token: { type: string }
+        admin: { $ref: "#/components/schemas/Admin" }
+
+    # --- Job ----------------------------------------------------------
+    Job:
+      type: object
+      required:
+        [id, title, organization, examName, postDate, status, slug, createdAt, updatedAt]
+      properties:
+        id: { type: integer }
+        title: { type: string }
+        organization: { type: string }
+        examName: { type: string }
+        postDate: { type: string, format: date }
+        lastDate: { type: ["string", "null"], format: date }
+        applyLink: { type: ["string", "null"] }
+        description: { type: ["string", "null"] }
+        vacancies: { type: ["integer", "null"] }
+        category: { type: ["string", "null"] }
+        status: { $ref: "#/components/schemas/PublishStatus" }
+        slug: { type: string }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+    JobInput:
+      type: object
+      required: [title, organization, examName, postDate, slug]
+      properties:
+        title: { type: string, minLength: 1 }
+        organization: { type: string, minLength: 1 }
+        examName: { type: string, minLength: 1 }
+        postDate: { type: string, format: date }
+        lastDate: { type: ["string", "null"], format: date }
+        applyLink: { type: ["string", "null"] }
+        description: { type: ["string", "null"] }
+        vacancies: { type: ["integer", "null"] }
+        category: { type: ["string", "null"] }
+        status: { $ref: "#/components/schemas/PublishStatus" }
+        slug: { type: string, minLength: 1 }
+    JobUpdate:
+      type: object
+      properties:
+        title: { type: string, minLength: 1 }
+        organization: { type: string, minLength: 1 }
+        examName: { type: string, minLength: 1 }
+        postDate: { type: string, format: date }
+        lastDate: { type: ["string", "null"], format: date }
+        applyLink: { type: ["string", "null"] }
+        description: { type: ["string", "null"] }
+        vacancies: { type: ["integer", "null"] }
+        category: { type: ["string", "null"] }
+        status: { $ref: "#/components/schemas/PublishStatus" }
+        slug: { type: string, minLength: 1 }
+
+    # --- Result ---------------------------------------------------------
+    Result:
+      type: object
+      required:
+        [id, title, organization, examName, resultDate, status, slug, createdAt, updatedAt]
+      properties:
+        id: { type: integer }
+        title: { type: string }
+        organization: { type: string }
+        examName: { type: string }
+        resultDate: { type: string, format: date }
+        resultLink: { type: ["string", "null"] }
+        description: { type: ["string", "null"] }
+        status: { $ref: "#/components/schemas/PublishStatus" }
+        slug: { type: string }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+    ResultInput:
+      type: object
+      required: [title, organization, examName, resultDate, slug]
+      properties:
+        title: { type: string, minLength: 1 }
+        organization: { type: string, minLength: 1 }
+        examName: { type: string, minLength: 1 }
+        resultDate: { type: string, format: date }
+        resultLink: { type: ["string", "null"] }
+        description: { type: ["string", "null"] }
+        status: { $ref: "#/components/schemas/PublishStatus" }
+        slug: { type: string, minLength: 1 }
+    ResultUpdate:
+      type: object
+      properties:
+        title: { type: string, minLength: 1 }
+        organization: { type: string, minLength: 1 }
+        examName: { type: string, minLength: 1 }
+        resultDate: { type: string, format: date }
+        resultLink: { type: ["string", "null"] }
+        description: { type: ["string", "null"] }
+        status: { $ref: "#/components/schemas/PublishStatus" }
+        slug: { type: string, minLength: 1 }
+
+    # --- AdmitCard --------------------------------------------------
+    AdmitCard:
+      type: object
+      required:
+        [id, title, organization, examName, examDate, status, slug, createdAt, updatedAt]
+      properties:
+        id: { type: integer }
+        title: { type: string }
+        organization: { type: string }
+        examName: { type: string }
+        examDate: { type: string, format: date }
+        admitCardLink: { type: ["string", "null"] }
+        description: { type: ["string", "null"] }
+        status: { $ref: "#/components/schemas/PublishStatus" }
+        slug: { type: string }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+    AdmitCardInput:
+      type: object
+      required: [title, organization, examName, examDate, slug]
+      properties:
+        title: { type: string, minLength: 1 }
+        organization: { type: string, minLength: 1 }
+        examName: { type: string, minLength: 1 }
+        examDate: { type: string, format: date }
+        admitCardLink: { type: ["string", "null"] }
+        description: { type: ["string", "null"] }
+        status: { $ref: "#/components/schemas/PublishStatus" }
+        slug: { type: string, minLength: 1 }
+    AdmitCardUpdate:
+      type: object
+      properties:
+        title: { type: string, minLength: 1 }
+        organization: { type: string, minLength: 1 }
+        examName: { type: string, minLength: 1 }
+        examDate: { type: string, format: date }
+        admitCardLink: { type: ["string", "null"] }
+        description: { type: ["string", "null"] }
+        status: { $ref: "#/components/schemas/PublishStatus" }
+        slug: { type: string, minLength: 1 }
+
+    # --- Syllabus -----------------------------------------------------
+    Syllabus:
+      type: object
+      required: [id, examName, title, pdfUrl, status, createdAt, updatedAt]
+      properties:
+        id: { type: integer }
+        examName: { type: string }
+        title: { type: string }
+        pdfUrl: { type: string }
+        description: { type: ["string", "null"] }
+        status: { $ref: "#/components/schemas/PublishStatus" }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+    SyllabusInput:
+      type: object
+      required: [examName, title, pdfUrl]
+      properties:
+        examName: { type: string, minLength: 1 }
+        title: { type: string, minLength: 1 }
+        pdfUrl: { type: string, minLength: 1 }
+        description: { type: ["string", "null"] }
+        status: { $ref: "#/components/schemas/PublishStatus" }
+    SyllabusUpdate:
+      type: object
+      properties:
+        examName: { type: string, minLength: 1 }
+        title: { type: string, minLength: 1 }
+        pdfUrl: { type: string, minLength: 1 }
+        description: { type: ["string", "null"] }
+        status: { $ref: "#/components/schemas/PublishStatus" }
+
+    # --- Exam prep: Subject / Topic / Question -------------------------
+    Subject:
+      type: object
+      required: [id, name, slug, createdAt]
+      properties:
+        id: { type: integer }
+        name: { type: string }
+        slug: { type: string }
+        description: { type: ["string", "null"] }
+        createdAt: { type: string, format: date-time }
+    SubjectInput:
+      type: object
+      required: [name, slug]
+      properties:
+        name: { type: string, minLength: 1 }
+        slug: { type: string, minLength: 1 }
+        description: { type: ["string", "null"] }
+    SubjectUpdate:
+      type: object
+      properties:
+        name: { type: string, minLength: 1 }
+        slug: { type: string, minLength: 1 }
+        description: { type: ["string", "null"] }
+
+    Topic:
+      type: object
+      required: [id, subjectId, name, slug, createdAt]
+      properties:
+        id: { type: integer }
+        subjectId: { type: integer }
+        name: { type: string }
+        slug: { type: string }
+        createdAt: { type: string, format: date-time }
+    TopicInput:
+      type: object
+      required: [subjectId, name, slug]
+      properties:
+        subjectId: { type: integer }
+        name: { type: string, minLength: 1 }
+        slug: { type: string, minLength: 1 }
+    TopicUpdate:
+      type: object
+      properties:
+        subjectId: { type: integer }
+        name: { type: string, minLength: 1 }
+        slug: { type: string, minLength: 1 }
+
+    Question:
+      type: object
+      required:
+        [id, topicId, questionText, options, correctOptionIndex, difficulty, createdAt]
+      properties:
+        id: { type: integer }
+        topicId: { type: integer }
+        questionText: { type: string }
+        options:
+          type: array
+          items: { type: string }
+        correctOptionIndex: { type: integer }
+        explanation: { type: ["string", "null"] }
+        difficulty: { type: string }
+        createdAt: { type: string, format: date-time }
+    QuestionInput:
+      type: object
+      required: [topicId, questionText, options, correctOptionIndex, difficulty]
+      properties:
+        topicId: { type: integer }
+        questionText: { type: string, minLength: 1 }
+        options:
+          type: array
+          items: { type: string }
+          minItems: 2
+        correctOptionIndex: { type: integer, minimum: 0 }
+        explanation: { type: ["string", "null"] }
+        difficulty: { type: string, minLength: 1 }
+    QuestionUpdate:
+      type: object
+      properties:
+        topicId: { type: integer }
+        questionText: { type: string, minLength: 1 }
+        options:
+          type: array
+          items: { type: string }
+          minItems: 2
+        correctOptionIndex: { type: integer, minimum: 0 }
+        explanation: { type: ["string", "null"] }
+        difficulty: { type: string, minLength: 1 }
+
+    PracticeQuestion:
+      type: object
+      required: [id, topicId, questionText, options, difficulty]
+      properties:
+        id: { type: integer }
+        topicId: { type: integer }
+        questionText: { type: string }
+        options:
+          type: array
+          items: { type: string }
+        difficulty: { type: string }
+
+    SubmitAnswersInput:
+      type: object
+      required: [answers]
+      properties:
+        answers:
+          type: array
+          items:
+            $ref: "#/components/schemas/AnswerInput"
+    AnswerInput:
+      type: object
+      required: [questionId, selectedOption]
+      properties:
+        questionId: { type: integer }
+        selectedOption: { type: integer }
+
+    SubmitAnswersResult:
+      type: object
+      required: [score, total, results]
+      properties:
+        score: { type: integer }
+        total: { type: integer }
+        results:
+          type: array
+          items:
+            $ref: "#/components/schemas/AnswerResult"
+    AnswerResult:
+      type: object
+      required: [questionId, correct, selectedOption, correctOption]
+      properties:
+        questionId: { type: integer }
+        correct: { type: boolean }
+        selectedOption: { type: integer }
+        correctOption: { type: integer }
+        explanation: { type: ["string", "null"] }
+
+    # --- Scraped items --------------------------------------------------
+    ScrapedItem:
+      type: object
+      required:
+        [id, sourceUrl, suggestedType, rawTitle, status, scrapedAt]
+      properties:
+        id: { type: integer }
+        sourceUrl: { type: string }
+        suggestedType: { $ref: "#/components/schemas/ScrapedSuggestedType" }
+        rawTitle: { type: string }
+        rawContent: { type: ["string", "null"] }
+        status: { $ref: "#/components/schemas/ScrapedStatus" }
+        scrapedAt: { type: string, format: date-time }
+        reviewedAt: { type: ["string", "null"], format: date-time }
+    ScrapedItemInput:
+      type: object
+      required: [sourceUrl, suggestedType, rawTitle]
+      properties:
+        sourceUrl: { type: string, minLength: 1 }
+        suggestedType: { $ref: "#/components/schemas/ScrapedSuggestedType" }
+        rawTitle: { type: string, minLength: 1 }
+        rawContent: { type: ["string", "null"] }
+
+    # --- Uploads --------------------------------------------------------
+    UploadResult:
+      type: object
+      required: [url]
+      properties:
+        url: { type: string }
+
+    # --- Aggregates -------------------------------------------------
+    TickerItem:
+      type: object
+      required: [id, type, title]
+      properties:
+        id: { type: string }
+        type: { type: string }
+        title: { type: string }
+        link: { type: ["string", "null"] }
+
+    HomeSummary:
+      type: object
+      required: [tickerItems, latestJobs, latestResults, latestAdmitCards, latestSyllabus]
+      properties:
+        tickerItems:
+          type: array
+          items: { $ref: "#/components/schemas/TickerItem" }
+        latestJobs:
+          type: array
+          items: { $ref: "#/components/schemas/Job" }
+        latestResults:
+          type: array
+          items: { $ref: "#/components/schemas/Result" }
+        latestAdmitCards:
+          type: array
+          items: { $ref: "#/components/schemas/AdmitCard" }
+        latestSyllabus:
+          type: array
+          items: { $ref: "#/components/schemas/Syllabus" }
+
+    AdminDashboardSummary:
+      type: object
+      required:
+        [totalJobs, totalResults, totalAdmitCards, totalSyllabus, totalQuestions, pendingScrapedItems]
+      properties:
+        totalJobs: { type: integer }
+        totalResults: { type: integer }
+        totalAdmitCards: { type: integer }
+        totalSyllabus: { type: integer }
+        totalQuestions: { type: integer }
+        pendingScrapedItems: { type: integer }

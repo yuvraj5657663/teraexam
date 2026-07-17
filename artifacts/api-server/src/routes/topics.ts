@@ -1,0 +1,105 @@
+import { Router, type IRouter } from "express";
+import { asc, eq } from "drizzle-orm";
+import { db, topicsTable } from "@workspace/db";
+import {
+  ListTopicsBySubjectParams,
+  ListTopicsBySubjectResponse,
+  AdminListTopicsResponse,
+  CreateTopicBody,
+  CreateTopicResponse,
+  UpdateTopicParams,
+  UpdateTopicBody,
+  UpdateTopicResponse,
+  DeleteTopicParams,
+} from "@workspace/api-zod";
+import { requireAdmin } from "../middlewares/require-admin";
+
+const router: IRouter = Router();
+
+router.get("/subjects/:id/topics", async (req, res): Promise<void> => {
+  const params = ListTopicsBySubjectParams.safeParse(req.params);
+  if (!params.success) {
+    res.status(400).json({ error: params.error.message });
+    return;
+  }
+
+  const topics = await db
+    .select()
+    .from(topicsTable)
+    .where(eq(topicsTable.subjectId, params.data.id))
+    .orderBy(asc(topicsTable.name));
+
+  res.json(ListTopicsBySubjectResponse.parse(topics));
+});
+
+router.get("/admin/topics", requireAdmin, async (req, res): Promise<void> => {
+  const subjectIdRaw = req.query["subjectId"];
+  const subjectId =
+    typeof subjectIdRaw === "string" && subjectIdRaw.length > 0 ? Number(subjectIdRaw) : undefined;
+
+  const topics = await db
+    .select()
+    .from(topicsTable)
+    .where(subjectId !== undefined ? eq(topicsTable.subjectId, subjectId) : undefined)
+    .orderBy(asc(topicsTable.name));
+
+  res.json(AdminListTopicsResponse.parse(topics));
+});
+
+router.post("/admin/topics", requireAdmin, async (req, res): Promise<void> => {
+  const parsed = CreateTopicBody.safeParse(req.body);
+  if (!parsed.success) {
+    res.status(400).json({ error: parsed.error.message });
+    return;
+  }
+
+  const [topic] = await db.insert(topicsTable).values(parsed.data).returning();
+
+  res.status(201).json(CreateTopicResponse.parse(topic));
+});
+
+router.patch("/admin/topics/:id", requireAdmin, async (req, res): Promise<void> => {
+  const params = UpdateTopicParams.safeParse(req.params);
+  if (!params.success) {
+    res.status(400).json({ error: params.error.message });
+    return;
+  }
+
+  const parsed = UpdateTopicBody.safeParse(req.body);
+  if (!parsed.success) {
+    res.status(400).json({ error: parsed.error.message });
+    return;
+  }
+
+  const [topic] = await db
+    .update(topicsTable)
+    .set(parsed.data)
+    .where(eq(topicsTable.id, params.data.id))
+    .returning();
+
+  if (!topic) {
+    res.status(404).json({ error: "Topic not found" });
+    return;
+  }
+
+  res.json(UpdateTopicResponse.parse(topic));
+});
+
+router.delete("/admin/topics/:id", requireAdmin, async (req, res): Promise<void> => {
+  const params = DeleteTopicParams.safeParse(req.params);
+  if (!params.success) {
+    res.status(400).json({ error: params.error.message });
+    return;
+  }
+
+  const [topic] = await db.delete(topicsTable).where(eq(topicsTable.id, params.data.id)).returning();
+
+  if (!topic) {
+    res.status(404).json({ error: "Topic not found" });
+    return;
+  }
+
+  res.sendStatus(204);
+});
+
+export default router;

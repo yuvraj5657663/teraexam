@@ -1,0 +1,27 @@
+kind = "web"
+previewPath = "/"
+title = "TERA EXAM"
+version = "1.0.0"
+id = "artifacts/tera-exam"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 24560
+
+[services.development]
+run = "pnpm --filter @workspace/tera-exam run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/tera-exam", "run", "build" ]
+serve = "static"
+publicDir = "artifacts/tera-exam/dist/public"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "24560"
+BASE_PATH = "/"
