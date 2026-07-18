@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { useGetMe, getGetMeQueryKey } from "@workspace/api-client-react";
 import { useEffect } from "react";
 
-import { LayoutDashboard, FileText, CheckSquare, FileKey, BookOpen, Database, Inbox, LogOut } from "lucide-react";
+import { LayoutDashboard, FileText, CheckSquare, FileKey, BookOpen, Database, Inbox, LogOut, BookMarked } from "lucide-react";
 
 export function AdminLayout({ children }: { children: React.ReactNode }) {
   const [location, setLocation] = useLocation();
@@ -35,6 +35,7 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
     { href: "/admin/jobs", label: "Jobs", icon: FileText },
     { href: "/admin/results", label: "Results", icon: CheckSquare },
     { href: "/admin/admit-cards", label: "Admit Cards", icon: FileKey },
+    { href: "/admin/blogs", label: "Blogs", icon: BookMarked },
     { href: "/admin/syllabus", label: "Syllabus", icon: BookOpen },
     { href: "/admin/exam-prep", label: "Exam Prep", icon: Database },
   ];

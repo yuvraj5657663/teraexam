@@ -964,6 +964,141 @@ paths:
           description: Not found
 
   # ---------------------------------------------------------------------
+  # Public: Blogs
+  # ---------------------------------------------------------------------
+  /blogs:
+    get:
+      operationId: listBlogs
+      tags: [blogs]
+      summary: List published blogs
+      parameters:
+        - name: search
+          in: query
+          schema: { type: string }
+        - name: category
+          in: query
+          schema: { type: string }
+      responses:
+        "200":
+          description: Blogs
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/Blog" }
+  /blogs/categories:
+    get:
+      operationId: listBlogCategories
+      tags: [blogs]
+      summary: Get all blog categories
+      responses:
+        "200":
+          description: Categories
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { type: string }
+  /blogs/{id}:
+    get:
+      operationId: getBlog
+      tags: [blogs]
+      summary: Get a published blog
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        "200":
+          description: Blog
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Blog" }
+        "404":
+          description: Not found
+
+  # ---------------------------------------------------------------------
+  # Admin: Blogs
+  # ---------------------------------------------------------------------
+  /admin/blogs:
+    get:
+      operationId: adminListBlogs
+      tags: [admin]
+      summary: List all blogs (any status)
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - name: search
+          in: query
+          schema: { type: string }
+        - name: status
+          in: query
+          schema: { $ref: "#/components/schemas/PublishStatus" }
+      responses:
+        "200":
+          description: Blogs
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/Blog" }
+    post:
+      operationId: createBlog
+      tags: [admin]
+      summary: Create a blog post
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/BlogInput" }
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Blog" }
+  /admin/blogs/{id}:
+    patch:
+      operationId: updateBlog
+      tags: [admin]
+      summary: Update a blog post
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/BlogUpdate" }
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Blog" }
+        "404":
+          description: Not found
+    delete:
+      operationId: deleteBlog
+      tags: [admin]
+      summary: Delete a blog post
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        "204":
+          description: Deleted
+        "404":
+          description: Not found
+
+  # ---------------------------------------------------------------------
   # NOTE: File uploads (POST /api/admin/uploads) are implemented directly in
   # the Express server with multer + Cloudinary and are intentionally NOT
   # part of this OpenAPI contract — multipart/form-data binary bodies don't
@@ -1406,3 +1541,56 @@ components:
         totalSyllabus: { type: integer }
         totalQuestions: { type: integer }
         pendingScrapedItems: { type: integer }
+
+    # --- Blog -----------------------------------------------------------
+    Blog:
+      type: object
+      required:
+        [id, title, excerpt, content, category, tags, author, readTime, status, slug, createdAt, updatedAt]
+      properties:
+        id: { type: integer }
+        title: { type: string }
+        excerpt: { type: string }
+        content: { type: string }
+        category: { type: string }
+        tags:
+          type: array
+          items: { type: string }
+        author: { type: string }
+        readTime: { type: string }
+        publishedAt: { type: ["string", "null"], format: date }
+        status: { $ref: "#/components/schemas/PublishStatus" }
+        slug: { type: string }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+    BlogInput:
+      type: object
+      required: [title, excerpt, content, category, readTime, slug]
+      properties:
+        title: { type: string, minLength: 1 }
+        excerpt: { type: string, minLength: 1 }
+        content: { type: string, minLength: 1 }
+        category: { type: string, minLength: 1 }
+        tags:
+          type: array
+          items: { type: string }
+        author: { type: string }
+        readTime: { type: string, minLength: 1 }
+        publishedAt: { type: ["string", "null"], format: date }
+        status: { $ref: "#/components/schemas/PublishStatus" }
+        slug: { type: string, minLength: 1 }
+    BlogUpdate:
+      type: object
+      properties:
+        title: { type: string, minLength: 1 }
+        excerpt: { type: string, minLength: 1 }
+        content: { type: string, minLength: 1 }
+        category: { type: string, minLength: 1 }
+        tags:
+          type: array
+          items: { type: string }
+        author: { type: string }
+        readTime: { type: string, minLength: 1 }
+        publishedAt: { type: ["string", "null"], format: date }
+        status: { $ref: "#/components/schemas/PublishStatus" }
+        slug: { type: string, minLength: 1 }

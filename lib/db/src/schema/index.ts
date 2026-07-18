@@ -8,3 +8,4 @@ export * from "./subjects";
 export * from "./topics";
 export * from "./questions";
 export * from "./scraped-items";
+export * from "./blogs";

@@ -432,6 +432,63 @@ export interface AdminDashboardSummary {
   pendingScrapedItems: number;
 }
 
+export interface Blog {
+  id: number;
+  title: string;
+  excerpt: string;
+  content: string;
+  category: string;
+  tags: string[];
+  author: string;
+  readTime: string;
+  /** @nullable */
+  publishedAt?: string | null;
+  status: PublishStatus;
+  slug: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface BlogInput {
+  /** @minLength 1 */
+  title: string;
+  /** @minLength 1 */
+  excerpt: string;
+  /** @minLength 1 */
+  content: string;
+  /** @minLength 1 */
+  category: string;
+  tags?: string[];
+  author?: string;
+  /** @minLength 1 */
+  readTime: string;
+  /** @nullable */
+  publishedAt?: string | null;
+  status?: PublishStatus;
+  /** @minLength 1 */
+  slug: string;
+}
+
+export interface BlogUpdate {
+  /** @minLength 1 */
+  title?: string;
+  /** @minLength 1 */
+  excerpt?: string;
+  /** @minLength 1 */
+  content?: string;
+  /** @minLength 1 */
+  category?: string;
+  tags?: string[];
+  author?: string;
+  /** @minLength 1 */
+  readTime?: string;
+  /** @nullable */
+  publishedAt?: string | null;
+  status?: PublishStatus;
+  /** @minLength 1 */
+  slug?: string;
+}
+
 export type ListJobsParams = {
 search?: string;
 };
@@ -478,5 +535,15 @@ topicId?: number;
 
 export type AdminListScrapedItemsParams = {
 status?: ScrapedStatus;
+};
+
+export type ListBlogsParams = {
+search?: string;
+category?: string;
+};
+
+export type AdminListBlogsParams = {
+search?: string;
+status?: PublishStatus;
 };
 

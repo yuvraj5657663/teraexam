@@ -1143,6 +1143,185 @@ export const RejectScrapedItemResponse = zod.object({
 
 
 /**
+ * @summary List published blogs
+ */
+export const ListBlogsQueryParams = zod.object({
+  "search": zod.coerce.string().optional(),
+  "category": zod.coerce.string().optional()
+})
+
+export const ListBlogsResponseItem = zod.object({
+  "id": zod.number(),
+  "title": zod.string(),
+  "excerpt": zod.string(),
+  "content": zod.string(),
+  "category": zod.string(),
+  "tags": zod.array(zod.string()),
+  "author": zod.string(),
+  "readTime": zod.string(),
+  "publishedAt": zod.coerce.date().nullish(),
+  "status": zod.enum(['draft', 'published']),
+  "slug": zod.string(),
+  "createdAt": zod.coerce.date(),
+  "updatedAt": zod.coerce.date()
+})
+export const ListBlogsResponse = zod.array(ListBlogsResponseItem)
+
+
+/**
+ * @summary Get all blog categories
+ */
+export const ListBlogCategoriesResponseItem = zod.string()
+export const ListBlogCategoriesResponse = zod.array(ListBlogCategoriesResponseItem)
+
+
+/**
+ * @summary Get a published blog
+ */
+export const GetBlogParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+export const GetBlogResponse = zod.object({
+  "id": zod.number(),
+  "title": zod.string(),
+  "excerpt": zod.string(),
+  "content": zod.string(),
+  "category": zod.string(),
+  "tags": zod.array(zod.string()),
+  "author": zod.string(),
+  "readTime": zod.string(),
+  "publishedAt": zod.coerce.date().nullish(),
+  "status": zod.enum(['draft', 'published']),
+  "slug": zod.string(),
+  "createdAt": zod.coerce.date(),
+  "updatedAt": zod.coerce.date()
+})
+
+
+/**
+ * @summary List all blogs (any status)
+ */
+export const AdminListBlogsQueryParams = zod.object({
+  "search": zod.coerce.string().optional(),
+  "status": zod.enum(['draft', 'published']).optional()
+})
+
+export const AdminListBlogsResponseItem = zod.object({
+  "id": zod.number(),
+  "title": zod.string(),
+  "excerpt": zod.string(),
+  "content": zod.string(),
+  "category": zod.string(),
+  "tags": zod.array(zod.string()),
+  "author": zod.string(),
+  "readTime": zod.string(),
+  "publishedAt": zod.coerce.date().nullish(),
+  "status": zod.enum(['draft', 'published']),
+  "slug": zod.string(),
+  "createdAt": zod.coerce.date(),
+  "updatedAt": zod.coerce.date()
+})
+export const AdminListBlogsResponse = zod.array(AdminListBlogsResponseItem)
+
+
+/**
+ * @summary Create a blog post
+ */
+
+
+
+
+
+
+
+
+export const CreateBlogBody = zod.object({
+  "title": zod.string().min(1),
+  "excerpt": zod.string().min(1),
+  "content": zod.string().min(1),
+  "category": zod.string().min(1),
+  "tags": zod.array(zod.string()).optional(),
+  "author": zod.string().optional(),
+  "readTime": zod.string().min(1),
+  "publishedAt": zod.coerce.date().nullish(),
+  "status": zod.enum(['draft', 'published']).optional(),
+  "slug": zod.string().min(1)
+})
+
+export const CreateBlogResponse = zod.object({
+  "id": zod.number(),
+  "title": zod.string(),
+  "excerpt": zod.string(),
+  "content": zod.string(),
+  "category": zod.string(),
+  "tags": zod.array(zod.string()),
+  "author": zod.string(),
+  "readTime": zod.string(),
+  "publishedAt": zod.coerce.date().nullish(),
+  "status": zod.enum(['draft', 'published']),
+  "slug": zod.string(),
+  "createdAt": zod.coerce.date(),
+  "updatedAt": zod.coerce.date()
+})
+
+
+/**
+ * @summary Update a blog post
+ */
+export const UpdateBlogParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+
+
+
+
+
+
+
+
+export const UpdateBlogBody = zod.object({
+  "title": zod.string().min(1).optional(),
+  "excerpt": zod.string().min(1).optional(),
+  "content": zod.string().min(1).optional(),
+  "category": zod.string().min(1).optional(),
+  "tags": zod.array(zod.string()).optional(),
+  "author": zod.string().optional(),
+  "readTime": zod.string().min(1).optional(),
+  "publishedAt": zod.coerce.date().nullish(),
+  "status": zod.enum(['draft', 'published']).optional(),
+  "slug": zod.string().min(1).optional()
+})
+
+export const UpdateBlogResponse = zod.object({
+  "id": zod.number(),
+  "title": zod.string(),
+  "excerpt": zod.string(),
+  "content": zod.string(),
+  "category": zod.string(),
+  "tags": zod.array(zod.string()),
+  "author": zod.string(),
+  "readTime": zod.string(),
+  "publishedAt": zod.coerce.date().nullish(),
+  "status": zod.enum(['draft', 'published']),
+  "slug": zod.string(),
+  "createdAt": zod.coerce.date(),
+  "updatedAt": zod.coerce.date()
+})
+
+
+/**
+ * @summary Delete a blog post
+ */
+export const DeleteBlogParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+export const DeleteBlogResponse = zod.void()
+
+
+/**
  * @summary Admin dashboard counts and pending review count
  */
 export const GetAdminDashboardSummaryResponse = zod.object({

@@ -28,6 +28,7 @@ import AdminScraped from '@/pages/admin/scraped-items';
 import AdminJobs from '@/pages/admin/jobs';
 import AdminResults from '@/pages/admin/results';
 import AdminAdmitCards from '@/pages/admin/admit-cards';
+import AdminBlogs from '@/pages/admin/blogs';
 
 import AdminSyllabus from '@/pages/admin/syllabus';
 import AdminExamPrep from '@/pages/admin/exam-prep';
@@ -94,6 +95,7 @@ function AdminRoutes() {
             <Route path="/admin/jobs" component={AdminJobs} />
             <Route path="/admin/results" component={AdminResults} />
             <Route path="/admin/admit-cards" component={AdminAdmitCards} />
+            <Route path="/admin/blogs" component={AdminBlogs} />
             <Route path="/admin/syllabus" component={AdminSyllabus} />
             <Route path="/admin/exam-prep" component={AdminExamPrep} />
             <Route path="/admin/scraped-items" component={AdminScraped} />

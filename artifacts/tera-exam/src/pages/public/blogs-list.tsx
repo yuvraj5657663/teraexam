@@ -1,73 +1,10 @@
 import { useState } from "react";
 import { Link } from "wouter";
+import { useListBlogs } from "@workspace/api-client-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Search, BookOpen, Calendar, ArrowRight, Clock } from "lucide-react";
-
-// Static blog content — replace with API when blog backend is built
-const BLOGS = [
-  {
-    id: 1,
-    title: "How to Prepare for SSC CGL 2026: Complete Strategy Guide",
-    excerpt:
-      "Cracking SSC CGL requires consistency, the right resources, and continuous mock tests. Here's a week-by-week plan that actually works for Tier-1 and Tier-2.",
-    date: "2026-07-10",
-    readTime: "5 min read",
-    category: "SSC",
-    tags: ["SSC CGL", "Strategy", "Tier-1"],
-  },
-  {
-    id: 2,
-    title: "UPSC Prelims Last Month Revision: What to Focus On",
-    excerpt:
-      "The final 30 days are the most critical window in your UPSC prep. Here's exactly what to revise, what to skip, and how to handle CSAT in the last stretch.",
-    date: "2026-06-28",
-    readTime: "8 min read",
-    category: "UPSC",
-    tags: ["UPSC", "Prelims", "Revision"],
-  },
-  {
-    id: 3,
-    title: "RRB NTPC 2026: Complete Syllabus Breakdown",
-    excerpt:
-      "Railway NTPC syllabus is vast but predictable. We break down every section — Math, GI, GS — with topic-wise weightage based on previous years.",
-    date: "2026-06-15",
-    readTime: "6 min read",
-    category: "Railways",
-    tags: ["RRB NTPC", "Syllabus", "Railways"],
-  },
-  {
-    id: 4,
-    title: "Quantitative Aptitude: 10 Shortcuts Every Aspirant Must Know",
-    excerpt:
-      "Time is the biggest enemy in competitive exams. These 10 mental math shortcuts will cut your quant solving time by 40% — with practice.",
-    date: "2026-06-01",
-    readTime: "7 min read",
-    category: "Exam Prep",
-    tags: ["Quant", "Shortcuts", "Math"],
-  },
-  {
-    id: 5,
-    title: "IBPS Clerk 2026: Eligibility, Exam Pattern, and How to Apply",
-    excerpt:
-      "Everything you need to know about IBPS Clerk 2026 — from eligibility criteria and age limits to the full exam pattern and application process.",
-    date: "2026-05-20",
-    readTime: "4 min read",
-    category: "Banking",
-    tags: ["IBPS", "Banking", "Eligibility"],
-  },
-  {
-    id: 6,
-    title: "Current Affairs for June 2026: Top 50 Questions",
-    excerpt:
-      "A curated list of the 50 most important current affairs questions from June 2026 — covering national, international, sports, awards, and economy.",
-    date: "2026-05-05",
-    readTime: "10 min read",
-    category: "Current Affairs",
-    tags: ["Current Affairs", "GK", "June 2026"],
-  },
-];
 
 const CATEGORY_COLORS: Record<string, string> = {
   SSC: "bg-blue-500/10 text-blue-700 dark:text-blue-400",
@@ -82,16 +19,22 @@ export default function BlogsList() {
   const [search, setSearch] = useState("");
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
 
-  const categories = Array.from(new Set(BLOGS.map((b) => b.category)));
-
-  const filtered = BLOGS.filter((blog) => {
-    const matchesSearch =
-      blog.title.toLowerCase().includes(search.toLowerCase()) ||
-      blog.excerpt.toLowerCase().includes(search.toLowerCase()) ||
-      blog.tags.some((t) => t.toLowerCase().includes(search.toLowerCase()));
-    const matchesCategory = !activeCategory || blog.category === activeCategory;
-    return matchesSearch && matchesCategory;
+  const { data: responseData, isLoading } = useListBlogs({ 
+    search: search || undefined, 
+    category: activeCategory || undefined 
   });
+
+  // API returns { data: Blog[], pagination: {...} } but generated types still say Blog[]
+  // Use unknown cast to safely extract either shape
+  const raw = responseData as unknown;
+  const blogs =
+    raw != null && typeof raw === "object" && !Array.isArray(raw) && Array.isArray((raw as Record<string, unknown>)["data"])
+      ? ((raw as Record<string, unknown>)["data"] as unknown[])
+      : Array.isArray(raw)
+        ? (raw as unknown[])
+        : [];
+
+  const categories = Array.from(new Set(blogs.map((b: any) => b.category)));
 
   return (
     <div className="container mx-auto px-4 py-12 max-w-5xl">
@@ -149,13 +92,17 @@ export default function BlogsList() {
       </div>
 
       {/* Results */}
-      {filtered.length === 0 ? (
+      {isLoading ? (
+        <div className="text-center py-20">
+          <p className="text-muted-foreground">Loading articles...</p>
+        </div>
+      ) : blogs.length === 0 ? (
         <div className="text-center py-20 border rounded-xl border-dashed bg-muted/20">
           <p className="text-muted-foreground">No articles found matching your criteria.</p>
         </div>
       ) : (
         <div className="grid gap-6 md:grid-cols-2">
-          {filtered.map((post) => (
+          {blogs.map((post: any) => (
             <Link key={post.id} href={`/blogs/${post.id}`}>
               <Card className="hover:border-primary/50 hover:shadow-md transition-all group cursor-pointer border-border/60 h-full flex flex-col">
                 <CardContent className="p-6 flex flex-col h-full">
@@ -181,7 +128,7 @@ export default function BlogsList() {
                   </p>
 
                   <div className="flex flex-wrap gap-1.5 mb-4">
-                    {post.tags.map((tag) => (
+                    {post.tags.map((tag: string) => (
                       <Badge key={tag} variant="outline" className="text-xs font-normal">
                         {tag}
                       </Badge>
@@ -191,7 +138,11 @@ export default function BlogsList() {
                   <div className="flex items-center justify-between pt-4 border-t border-border/40 mt-auto">
                     <span className="text-xs text-muted-foreground flex items-center gap-1">
                       <Calendar className="h-3 w-3" aria-hidden="true" />
-                      {new Date(post.date).toLocaleDateString("en-IN", {
+                      {post.publishedAt ? new Date(post.publishedAt).toLocaleDateString("en-IN", {
+                        day: "numeric",
+                        month: "short",
+                        year: "numeric",
+                      }) : new Date(post.createdAt).toLocaleDateString("en-IN", {
                         day: "numeric",
                         month: "short",
                         year: "numeric",

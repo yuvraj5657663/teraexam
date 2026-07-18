@@ -12,6 +12,7 @@ import questionsRouter from "./questions";
 import scrapedItemsRouter from "./scraped-items";
 import uploadsRouter from "./uploads";
 import adminDashboardRouter from "./admin-dashboard";
+import blogsRouter from "./blogs";
 
 const router: IRouter = Router();
 
@@ -28,5 +29,6 @@ router.use(questionsRouter);
 router.use(scrapedItemsRouter);
 router.use(uploadsRouter);
 router.use(adminDashboardRouter);
+router.use(blogsRouter);
 
 export default router;
