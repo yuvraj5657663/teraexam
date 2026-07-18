@@ -35,7 +35,9 @@ export default function AdminAdmitCards() {
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
-  const { data: cards = [], isLoading } = useAdminListAdmitCards({ search: search || undefined });
+  const { data, isLoading } = useAdminListAdmitCards({ search: search || undefined });
+  // API returns { data: [...], pagination: {...} } but generated types still say array
+  const cards = (data as any)?.data ?? data ?? [];
   
   const createMutation = useCreateAdmitCard();
   const updateMutation = useUpdateAdmitCard();
@@ -74,11 +76,12 @@ export default function AdminAdmitCards() {
     });
   };
 
-  const openEdit = (item: any) => {
+  const openEdit = (item: { id: number; title: string; organization: string; examName: string; examDate?: string | Date | null; admitCardLink?: string | null; description?: string | null; slug: string; status: "draft" | "published" }) => {
     setEditingId(item.id);
+    const examDateStr = typeof item.examDate === 'string' ? item.examDate : item.examDate?.toISOString().split('T')[0] || '';
     form.reset({
       ...item,
-      examDate: item.examDate.split('T')[0],
+      examDate: examDateStr,
       admitCardLink: item.admitCardLink || "",
       description: item.description || "",
     });
@@ -163,7 +166,7 @@ export default function AdminAdmitCards() {
             ) : cards.length === 0 ? (
               <TableRow><TableCell colSpan={5} className="text-center py-8 text-muted-foreground">No admit cards found</TableCell></TableRow>
             ) : (
-              cards.map((item) => (
+              cards.map((item: any) => (
                 <TableRow key={item.id}>
                   <TableCell>
                     <div className="font-medium text-foreground">{item.title}</div>
@@ -174,7 +177,7 @@ export default function AdminAdmitCards() {
                     <div className="text-xs text-muted-foreground mt-1">{item.examName}</div>
                   </TableCell>
                   <TableCell className="text-sm font-mono text-muted-foreground">
-                    {item.examDate.split('T')[0]}
+                    {typeof item.examDate === 'string' ? item.examDate.split('T')[0] : item.examDate?.toISOString().split('T')[0] || 'N/A'}
                   </TableCell>
                   <TableCell className="text-center">
                     <Switch 

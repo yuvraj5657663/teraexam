@@ -43,6 +43,13 @@ import JobsList from './pages/public/jobs-list';
 import ResultDetail from './pages/public/result-detail';
 import ResultsList from './pages/public/results-list';
 import SyllabusList from './pages/public/syllabus-list';
+import About from "./pages/public/about";
+import Contact from "./pages/public/contact";
+import Privacy from "./pages/public/privacy";
+
+// New Blog Pages Imports
+import BlogsList from '@/pages/public/blogs-list';
+import BlogDetail from '@/pages/public/blog-detail';
 
 function PublicRoutes() {
   return (
@@ -56,6 +63,15 @@ function PublicRoutes() {
         <Route path="/admit-cards" component={AdmitCardsList} />
         <Route path="/admit-cards/:id" component={AdmitCardDetail} />
         <Route path="/syllabus" component={SyllabusList} />
+        
+        {/* Added New Blog Routes Here */}
+        <Route path="/blogs" component={BlogsList} />
+        <Route path="/blogs/:id" component={BlogDetail} />
+
+        <Route path="/about" component={About} />
+        <Route path="/contact" component={Contact} />
+        <Route path="/privacy" component={Privacy} />
+
         <Route path="/exam-prep" component={ExamPrepSubjects} />
         <Route path="/exam-prep/:subjectId" component={ExamPrepTopics} />
         <Route path="/exam-prep/:subjectId/:topicId" component={ExamPrepSession} />
@@ -69,7 +85,9 @@ function AdminRoutes() {
   return (
     <Switch>
       <Route path="/admin/login" component={AdminLogin} />
-      <Route path="/admin/*">
+      {/* Pathless catch-all: matches bare /admin AND all /admin/* sub-paths.
+          regexparam's `:rest*` requires a trailing separator so it misses bare /admin. */}
+      <Route>
         <AdminLayout>
           <Switch>
             <Route path="/admin" component={AdminDashboard} />

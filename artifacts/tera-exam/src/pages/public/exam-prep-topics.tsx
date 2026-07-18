@@ -12,7 +12,7 @@ export default function ExamPrepTopics() {
   const { data: topics, isLoading } = useListTopicsBySubject(subjectId, { query: { enabled: !!subjectId, queryKey: getListTopicsBySubjectQueryKey(subjectId) } });
   const { data: subjects } = useListSubjects();
   
-  const subject = subjects?.find(s => s.id === subjectId);
+  const subject = subjects?.find((s: any) => s.id === subjectId);
 
   return (
     <div className="container mx-auto px-4 py-12 max-w-4xl">
@@ -39,7 +39,7 @@ export default function ExamPrepTopics() {
         </div>
       ) : (
         <div className="grid gap-4">
-          {topics?.map((topic) => (
+          {topics?.map((topic: any) => (
             <Link key={topic.id} href={`/exam-prep/${subjectId}/${topic.id}`}>
               <Card className="hover:border-primary/50 hover:shadow-md transition-all group cursor-pointer border-border/60">
                 <CardContent className="p-6 flex items-center gap-4">

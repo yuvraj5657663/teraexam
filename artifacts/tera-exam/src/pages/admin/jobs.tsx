@@ -38,7 +38,9 @@ export default function AdminJobs() {
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
-  const { data: jobs = [], isLoading } = useAdminListJobs({ search: search || undefined });
+  const { data, isLoading } = useAdminListJobs({ search: search || undefined });
+  // API returns { data: [...], pagination: {...} } but generated types still say array
+  const jobs = (data as any)?.data ?? data ?? [];
   
   const createMutation = useCreateJob();
   const updateMutation = useUpdateJob();
@@ -77,15 +79,17 @@ export default function AdminJobs() {
     });
   };
 
-  const openEdit = (job: any) => {
+  const openEdit = (job: { id: number; title: string; organization: string; examName: string; postDate?: string | Date | null; lastDate?: string | Date | null; applyLink?: string | null; description?: string | null; vacancies?: number | null; category?: string | null; status: "draft" | "published"; slug: string }) => {
     setEditingId(job.id);
+    const postDateStr = typeof job.postDate === 'string' ? job.postDate : job.postDate?.toISOString().split('T')[0] || '';
+    const lastDateStr = job.lastDate ? (typeof job.lastDate === 'string' ? job.lastDate : job.lastDate.toISOString().split('T')[0]) : '';
     form.reset({
       ...job,
-      postDate: job.postDate.split('T')[0],
-      lastDate: job.lastDate ? job.lastDate.split('T')[0] : "",
+      postDate: postDateStr,
+      lastDate: lastDateStr,
       applyLink: job.applyLink || "",
       description: job.description || "",
-      vacancies: job.vacancies || "",
+      vacancies: job.vacancies || undefined,
       category: job.category || "",
     });
     setIsFormOpen(true);
@@ -107,6 +111,7 @@ export default function AdminJobs() {
       applyLink: values.applyLink || null,
       lastDate: values.lastDate ? new Date(values.lastDate).toISOString() : null,
       postDate: new Date(values.postDate).toISOString(),
+      vacancies: values.vacancies || null,
     };
 
     if (editingId) {
@@ -171,7 +176,7 @@ export default function AdminJobs() {
             ) : jobs.length === 0 ? (
               <TableRow><TableCell colSpan={5} className="text-center py-8 text-muted-foreground">No jobs found</TableCell></TableRow>
             ) : (
-              jobs.map((job) => (
+              jobs.map((job: any) => (
                 <TableRow key={job.id}>
                   <TableCell>
                     <div className="font-medium text-foreground">{job.title}</div>

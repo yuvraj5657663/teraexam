@@ -35,7 +35,9 @@ export default function AdminResults() {
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
-  const { data: results = [], isLoading } = useAdminListResults({ search: search || undefined });
+  const { data, isLoading } = useAdminListResults({ search: search || undefined });
+  // API returns { data: [...], pagination: {...} } but generated types still say array
+  const results = (data as any)?.data ?? data ?? [];
   
   const createMutation = useCreateResult();
   const updateMutation = useUpdateResult();
@@ -74,11 +76,12 @@ export default function AdminResults() {
     });
   };
 
-  const openEdit = (item: any) => {
+  const openEdit = (item: { id: number; title: string; organization: string; examName: string; resultDate?: string | Date | null; resultLink?: string | null; description?: string | null; status: "draft" | "published"; slug: string }) => {
     setEditingId(item.id);
+    const resultDateStr = typeof item.resultDate === 'string' ? item.resultDate : item.resultDate?.toISOString().split('T')[0] || '';
     form.reset({
       ...item,
-      resultDate: item.resultDate.split('T')[0],
+      resultDate: resultDateStr,
       resultLink: item.resultLink || "",
       description: item.description || "",
     });
@@ -163,7 +166,7 @@ export default function AdminResults() {
             ) : results.length === 0 ? (
               <TableRow><TableCell colSpan={5} className="text-center py-8 text-muted-foreground">No results found</TableCell></TableRow>
             ) : (
-              results.map((item) => (
+              results.map((item: any) => (
                 <TableRow key={item.id}>
                   <TableCell>
                     <div className="font-medium text-foreground">{item.title}</div>
@@ -174,7 +177,7 @@ export default function AdminResults() {
                     <div className="text-xs text-muted-foreground mt-1">{item.examName}</div>
                   </TableCell>
                   <TableCell className="text-sm font-mono text-muted-foreground">
-                    {item.resultDate.split('T')[0]}
+                    {typeof item.resultDate === 'string' ? item.resultDate.split('T')[0] : item.resultDate?.toISOString().split('T')[0] || 'N/A'}
                   </TableCell>
                   <TableCell className="text-center">
                     <Switch 

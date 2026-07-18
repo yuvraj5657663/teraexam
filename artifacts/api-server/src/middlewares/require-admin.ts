@@ -23,7 +23,7 @@ export function requireAdmin(req: Request, res: Response, next: NextFunction): v
     req.admin = verifyAdminToken(token);
     next();
   } catch (err) {
-    req.log.warn({ err }, "Invalid admin token");
+    req.log?.warn({ err }, "Invalid admin token");
     res.status(401).json({ error: "Invalid or expired token" });
   }
 }

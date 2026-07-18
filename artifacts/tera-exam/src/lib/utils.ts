@@ -6,11 +6,13 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
 
-export function formatDate(dateString: string | undefined | null) {
-  if (!dateString) return "N/A"
+export function formatDate(dateValue: string | Date | undefined | null) {
+  if (!dateValue) return "N/A"
+
   try {
-    return format(parseISO(dateString), "dd MMM yyyy")
-  } catch (e) {
-    return dateString
+    const date = dateValue instanceof Date ? dateValue : parseISO(dateValue);
+    return format(date, "dd MMM yyyy");
+  } catch {
+    return String(dateValue);
   }
 }

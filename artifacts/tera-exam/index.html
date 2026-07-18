@@ -1,23 +1,90 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1" />
-    <title>TERA EXAM</title>
-    <meta name="description" content="TERA EXAM — built on Replit. Update this description to reflect the app." />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <!-- Primary SEO -->
+    <title>TERA EXAM — Sarkari Jobs, Results, Admit Cards & Exam Prep</title>
+    <meta
+      name="description"
+      content="India's fastest Sarkari exam portal. Get real-time updates on government jobs, exam results, admit cards, and official syllabus PDFs. Practice MCQs for SSC, UPSC, Banking, Railways & more."
+    />
+    <meta
+      name="keywords"
+      content="sarkari job, government jobs India, SSC CGL, UPSC, RRB NTPC, IBPS, admit card, exam result, sarkari result, syllabus, exam preparation, MCQ practice"
+    />
+    <meta name="author" content="TERA EXAM" />
     <meta name="robots" content="index, follow" />
-    <meta property="og:title" content="TERA EXAM" />
-    <meta property="og:description" content="TERA EXAM — built on Replit. Update this description to reflect the app." />
+    <link rel="canonical" href="https://teraexam.in/" />
+
+    <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://teraexam.in/" />
+    <meta property="og:title" content="TERA EXAM — Sarkari Jobs, Results & Exam Prep" />
+    <meta
+      property="og:description"
+      content="Real-time Sarkari exam notifications — jobs, results, admit cards, syllabus PDFs, and structured MCQ practice for SSC, UPSC, Banking, Railways."
+    />
+    <meta property="og:image" content="https://teraexam.in/og-image.png" />
+    <meta property="og:locale" content="en_IN" />
+    <meta property="og:site_name" content="TERA EXAM" />
+
+    <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="TERA EXAM" />
-    <meta name="twitter:description" content="TERA EXAM — built on Replit. Update this description to reflect the app." />
+    <meta name="twitter:url" content="https://teraexam.in/" />
+    <meta name="twitter:title" content="TERA EXAM — Sarkari Jobs, Results & Exam Prep" />
+    <meta
+      name="twitter:description"
+      content="Real-time Sarkari exam notifications and MCQ practice for SSC, UPSC, Banking, Railways."
+    />
+    <meta name="twitter:image" content="https://teraexam.in/og-image.png" />
+
+    <!-- Theme & PWA -->
+    <meta name="theme-color" content="#c9184a" />
+    <meta name="color-scheme" content="light dark" />
+
+    <!-- Favicon -->
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+
+    <!-- Fonts — preconnect for performance -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- Structured Data -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "WebSite",
+        "name": "TERA EXAM",
+        "url": "https://teraexam.in",
+        "description": "India's fastest Sarkari exam portal for government jobs, results, admit cards, and exam preparation.",
+        "potentialAction": {
+          "@type": "SearchAction",
+          "target": {
+            "@type": "EntryPoint",
+            "urlTemplate": "https://teraexam.in/jobs?search={search_term_string}"
+          },
+          "query-input": "required name=search_term_string"
+        }
+      }
+    </script>
   </head>
   <body>
+    <!-- Skip to main content for accessibility -->
+    <a
+      href="#main-content"
+      class="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:px-4 focus:py-2 focus:bg-primary focus:text-primary-foreground focus:rounded-md focus:font-semibold"
+    >
+      Skip to main content
+    </a>
+
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>

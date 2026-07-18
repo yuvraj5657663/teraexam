@@ -10,7 +10,9 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 
 export default function AdminScrapedItems() {
   const [statusFilter, setStatusFilter] = useState<"pending" | "approved" | "rejected">("pending");
-  const { data: items = [], isLoading } = useAdminListScrapedItems({ status: statusFilter });
+  const { data, isLoading } = useAdminListScrapedItems({ status: statusFilter });
+  // API returns { data: [...], pagination: {...} } but generated types still say array
+  const items = (data as any)?.data ?? data ?? [];
   
   const queryClient = useQueryClient();
   const approveMutation = useApproveScrapedItem();
@@ -85,7 +87,7 @@ export default function AdminScrapedItems() {
       ) : (
         <ScrollArea className="flex-1 -mx-4 px-4 pb-12">
           <div className="grid gap-4">
-            {items.map(item => (
+            {items.map((item: any) => (
               <Card key={item.id} className="overflow-hidden transition-all hover:shadow-md border-border/50">
                 <div className="flex flex-col md:flex-row">
                   <div className="flex-1 p-6">

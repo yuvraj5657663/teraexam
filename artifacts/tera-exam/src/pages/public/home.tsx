@@ -21,7 +21,7 @@ export default function Home() {
             </span>
             <div className="flex-1 overflow-hidden relative">
               <div className="flex whitespace-nowrap animate-in slide-in-from-right-full duration-[30s] repeat-infinite linear text-sm font-medium">
-                {summary.tickerItems.map((item, idx) => (
+                {summary.tickerItems.map((item: { id: string; type: string; title: string; link?: string }, idx: number) => (
                   <span key={item.id} className="mx-8 flex items-center gap-2">
                     <Badge variant="secondary" className="bg-primary-foreground/20 text-primary-foreground hover:bg-primary-foreground/30 border-none">
                       {item.type.replace('_', ' ')}
@@ -76,11 +76,11 @@ export default function Home() {
           <TabsContent value="jobs" className="space-y-4 animate-in fade-in-50 duration-500">
             {isLoading ? (
               <div className="text-center py-12 text-muted-foreground">Loading...</div>
-            ) : summary?.latestJobs?.length === 0 ? (
+            ) : !summary?.latestJobs || summary.latestJobs.length === 0 ? (
               <div className="text-center py-12 text-muted-foreground border rounded-xl border-dashed">No jobs published recently.</div>
             ) : (
               <div className="grid gap-4">
-                {summary?.latestJobs.map((job) => (
+                {summary.latestJobs.map((job: { id: number; organization: string; vacancies?: number | null; title: string; examName: string; lastDate?: Date | string | null }) => (
                   <Link key={job.id} href={`/jobs/${job.id}`}>
                     <Card className="hover:border-primary/50 hover:shadow-md transition-all group cursor-pointer border-border/60">
                       <CardContent className="p-6 flex flex-col md:flex-row md:items-center gap-4">
@@ -114,31 +114,35 @@ export default function Home() {
           </TabsContent>
 
           <TabsContent value="results" className="space-y-4 animate-in fade-in-50 duration-500">
-            <div className="grid gap-4">
-              {summary?.latestResults.map((item) => (
-                <Link key={item.id} href={`/results/${item.id}`}>
-                  <Card className="hover:border-primary/50 hover:shadow-md transition-all group cursor-pointer border-border/60">
-                    <CardContent className="p-6 flex flex-col md:flex-row md:items-center gap-4">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2 mb-2">
-                          <Badge variant="secondary" className="bg-emerald-500/10 text-emerald-700 font-medium">Result Declared</Badge>
-                          <span className="text-xs font-mono text-muted-foreground uppercase">{item.organization}</span>
+            {!summary?.latestResults || summary.latestResults.length === 0 ? (
+              <div className="text-center py-12 text-muted-foreground border rounded-xl border-dashed">No results published recently.</div>
+            ) : (
+              <div className="grid gap-4">
+                {summary.latestResults.map((item: { id: number; organization: string; title: string; resultDate?: Date | string | null }) => (
+                  <Link key={item.id} href={`/results/${item.id}`}>
+                    <Card className="hover:border-primary/50 hover:shadow-md transition-all group cursor-pointer border-border/60">
+                      <CardContent className="p-6 flex flex-col md:flex-row md:items-center gap-4">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 mb-2">
+                            <Badge variant="secondary" className="bg-emerald-500/10 text-emerald-700 font-medium">Result Declared</Badge>
+                            <span className="text-xs font-mono text-muted-foreground uppercase">{item.organization}</span>
+                          </div>
+                          <h3 className="text-xl font-bold font-serif group-hover:text-primary transition-colors">{item.title}</h3>
                         </div>
-                        <h3 className="text-xl font-bold font-serif group-hover:text-primary transition-colors">{item.title}</h3>
-                      </div>
-                      <div className="flex items-center gap-4 md:flex-col md:items-end shrink-0 border-t md:border-t-0 md:border-l pt-4 md:pt-0 md:pl-6">
-                        <div className="text-sm font-medium flex items-center gap-1.5 text-muted-foreground">
-                           {formatDate(item.resultDate)}
+                        <div className="flex items-center gap-4 md:flex-col md:items-end shrink-0 border-t md:border-t-0 md:border-l pt-4 md:pt-0 md:pl-6">
+                          <div className="text-sm font-medium flex items-center gap-1.5 text-muted-foreground">
+                             {formatDate(item.resultDate)}
+                          </div>
+                          <span className="text-primary text-sm font-semibold flex items-center mt-2 md:mt-0 group-hover:translate-x-1 transition-transform">
+                            Check Result <ArrowRight className="ml-1 h-4 w-4" />
+                          </span>
                         </div>
-                        <span className="text-primary text-sm font-semibold flex items-center mt-2 md:mt-0 group-hover:translate-x-1 transition-transform">
-                          Check Result <ArrowRight className="ml-1 h-4 w-4" />
-                        </span>
-                      </div>
-                    </CardContent>
-                  </Card>
-                </Link>
-              ))}
-            </div>
+                      </CardContent>
+                    </Card>
+                  </Link>
+                ))}
+              </div>
+            )}
             <div className="mt-8 text-center">
               <Button variant="ghost" className="font-semibold" asChild>
                 <Link href="/results">View All Results <ArrowRight className="ml-2 h-4 w-4" /></Link>
@@ -147,31 +151,35 @@ export default function Home() {
           </TabsContent>
 
           <TabsContent value="admit-cards" className="space-y-4 animate-in fade-in-50 duration-500">
-             <div className="grid gap-4">
-              {summary?.latestAdmitCards.map((item) => (
-                <Link key={item.id} href={`/admit-cards/${item.id}`}>
-                  <Card className="hover:border-primary/50 hover:shadow-md transition-all group cursor-pointer border-border/60">
-                    <CardContent className="p-6 flex flex-col md:flex-row md:items-center gap-4">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2 mb-2">
-                          <Badge variant="secondary" className="bg-purple-500/10 text-purple-700 font-medium">Admit Card Out</Badge>
-                          <span className="text-xs font-mono text-muted-foreground uppercase">{item.organization}</span>
+             {!summary?.latestAdmitCards || summary.latestAdmitCards.length === 0 ? (
+              <div className="text-center py-12 text-muted-foreground border rounded-xl border-dashed">No admit cards available recently.</div>
+             ) : (
+              <div className="grid gap-4">
+                {summary.latestAdmitCards.map((item: { id: number; organization: string; title: string; examDate?: Date | string | null }) => (
+                  <Link key={item.id} href={`/admit-cards/${item.id}`}>
+                    <Card className="hover:border-primary/50 hover:shadow-md transition-all group cursor-pointer border-border/60">
+                      <CardContent className="p-6 flex flex-col md:flex-row md:items-center gap-4">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 mb-2">
+                            <Badge variant="secondary" className="bg-purple-500/10 text-purple-700 font-medium">Admit Card Out</Badge>
+                            <span className="text-xs font-mono text-muted-foreground uppercase">{item.organization}</span>
+                          </div>
+                          <h3 className="text-xl font-bold font-serif group-hover:text-primary transition-colors">{item.title}</h3>
                         </div>
-                        <h3 className="text-xl font-bold font-serif group-hover:text-primary transition-colors">{item.title}</h3>
-                      </div>
-                      <div className="flex items-center gap-4 md:flex-col md:items-end shrink-0 border-t md:border-t-0 md:border-l pt-4 md:pt-0 md:pl-6">
-                        <div className="text-sm font-medium flex items-center gap-1.5 text-muted-foreground">
-                           Exam: {formatDate(item.examDate)}
+                        <div className="flex items-center gap-4 md:flex-col md:items-end shrink-0 border-t md:border-t-0 md:border-l pt-4 md:pt-0 md:pl-6">
+                          <div className="text-sm font-medium flex items-center gap-1.5 text-muted-foreground">
+                            Exam: {formatDate(item.examDate)}
+                          </div>
+                          <span className="text-primary text-sm font-semibold flex items-center mt-2 md:mt-0 group-hover:translate-x-1 transition-transform">
+                            Download <ArrowRight className="ml-1 h-4 w-4" />
+                          </span>
                         </div>
-                        <span className="text-primary text-sm font-semibold flex items-center mt-2 md:mt-0 group-hover:translate-x-1 transition-transform">
-                          Download <ArrowRight className="ml-1 h-4 w-4" />
-                        </span>
-                      </div>
-                    </CardContent>
-                  </Card>
-                </Link>
-              ))}
-            </div>
+                      </CardContent>
+                    </Card>
+                  </Link>
+                ))}
+              </div>
+            )}
             <div className="mt-8 text-center">
               <Button variant="ghost" className="font-semibold" asChild>
                 <Link href="/admit-cards">View All Admit Cards <ArrowRight className="ml-2 h-4 w-4" /></Link>

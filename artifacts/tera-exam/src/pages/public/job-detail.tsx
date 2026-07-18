@@ -113,7 +113,7 @@ export default function JobDetail() {
                 <div className="prose prose-slate dark:prose-invert max-w-none prose-p:leading-relaxed prose-headings:font-serif">
                   {/* Since description is plain text from API, we'll format it simply. 
                       If it contained markdown, we'd render it via a markdown component. */}
-                  {job.description.split('\n').map((paragraph, idx) => (
+                  {job.description.split('\n').map((paragraph: string, idx: number) => (
                     paragraph ? <p key={idx}>{paragraph}</p> : <br key={idx} />
                   ))}
                 </div>

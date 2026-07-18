@@ -21,9 +21,9 @@ export default function ExamPrepSession() {
   const [timeLeft, setTimeLeft] = useState(0);
   const [isStarted, setIsStarted] = useState(false);
   const [isFinished, setIsFinished] = useState(false);
-  const [results, setResults] = useState<any>(null);
+  const [results, setResults] = useState<{ score: number; total: number; results: Array<{ questionId: number; correct: boolean; selectedOption: number; correctOption: number; explanation?: string | null }> } | null>(null);
 
-  const topic = topics?.find(t => t.id === topicId);
+  const topic = topics?.find((topicItem: { id: number; name: string; slug: string }) => topicItem.id === topicId);
 
   // Initialize timer
   useEffect(() => {
@@ -63,14 +63,14 @@ export default function ExamPrepSession() {
     }));
     
     // Fill in unanswered with -1
-    questions.forEach(q => {
-      if (answers[q.id] === undefined) {
-        answersPayload.push({ questionId: q.id, selectedOption: -1 });
+    questions.forEach((question: { id: number }) => {
+      if (answers[question.id] === undefined) {
+        answersPayload.push({ questionId: question.id, selectedOption: -1 });
       }
     });
 
     submitAnswers.mutate({ id: topicId, data: { answers: answersPayload } }, {
-      onSuccess: (data) => {
+      onSuccess: (data: any) => {
         setResults(data);
       }
     });
@@ -143,13 +143,13 @@ export default function ExamPrepSession() {
 
         <h2 className="text-xl font-bold mb-6">Detailed Review</h2>
         <div className="space-y-6">
-          {questions.map((q, idx) => {
-            const result = results.results.find((r: any) => r.questionId === q.id);
+          {questions.map((question: { id: number; questionText: string; options: string[] }, idx: number) => {
+            const result = results.results.find((resultItem: { questionId: number; correct: boolean; selectedOption: number; correctOption: number; explanation?: string | null }) => resultItem.questionId === question.id);
             const isCorrect = result?.correct;
             const notAnswered = result?.selectedOption === -1;
 
             return (
-              <Card key={q.id} className={`border-2 ${isCorrect ? 'border-emerald-500/30 bg-emerald-50/10' : notAnswered ? 'border-border' : 'border-destructive/30 bg-destructive/5'}`}>
+              <Card key={question.id} className={`border-2 ${isCorrect ? 'border-emerald-500/30 bg-emerald-50/10' : notAnswered ? 'border-border' : 'border-destructive/30 bg-destructive/5'}`}>
                 <CardContent className="p-6">
                   <div className="flex items-start gap-4 mb-6">
                     <div className="shrink-0 mt-1">
@@ -157,25 +157,25 @@ export default function ExamPrepSession() {
                     </div>
                     <div>
                       <div className="text-sm text-muted-foreground font-medium mb-1">Question {idx + 1}</div>
-                      <h3 className="font-semibold text-lg">{q.questionText}</h3>
+                      <h3 className="font-semibold text-lg">{question.questionText}</h3>
                     </div>
                   </div>
 
                   <div className="space-y-2 ml-10">
-                    {q.options.map((opt, oIdx) => {
-                      const isSelected = result?.selectedOption === oIdx;
-                      const isActuallyCorrect = result?.correctOption === oIdx;
+                    {question.options.map((option: string, optionIndex: number) => {
+                      const isSelected = result?.selectedOption === optionIndex;
+                      const isActuallyCorrect = result?.correctOption === optionIndex;
                       
                       let optClass = "border bg-background";
                       if (isActuallyCorrect) optClass = "border-emerald-500 bg-emerald-500/10 font-medium";
                       else if (isSelected && !isActuallyCorrect) optClass = "border-destructive bg-destructive/10 text-destructive";
 
                       return (
-                        <div key={oIdx} className={`p-3 rounded-lg text-sm flex items-center gap-3 ${optClass}`}>
+                        <div key={optionIndex} className={`p-3 rounded-lg text-sm flex items-center gap-3 ${optClass}`}>
                           <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-medium border ${isActuallyCorrect ? 'bg-emerald-500 text-white border-transparent' : isSelected ? 'bg-destructive text-white border-transparent' : 'bg-background'}`}>
-                            {String.fromCharCode(65 + oIdx)}
+                            {String.fromCharCode(65 + optionIndex)}
                           </div>
-                          {opt}
+                          {option}
                         </div>
                       );
                     })}
@@ -225,29 +225,29 @@ export default function ExamPrepSession() {
       </div>
 
       <div className="container mx-auto px-4 py-8 max-w-3xl space-y-8 pb-24">
-        {questions.map((q, idx) => (
-          <Card key={q.id} id={`q-${q.id}`} className="border-border shadow-sm scroll-mt-24">
+        {questions.map((question: { id: number; questionText: string; options: string[] }, idx: number) => (
+          <Card key={question.id} id={`q-${question.id}`} className="border-border shadow-sm scroll-mt-24">
             <CardContent className="p-6 md:p-8">
               <div className="flex gap-4 mb-6">
                 <div className="h-8 w-8 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold shrink-0">
                   {idx + 1}
                 </div>
-                <h3 className="font-medium text-lg leading-relaxed pt-0.5">{q.questionText}</h3>
+                <h3 className="font-medium text-lg leading-relaxed pt-0.5">{question.questionText}</h3>
               </div>
               
               <div className="space-y-3 ml-12">
-                {q.options.map((opt, oIdx) => {
-                  const isSelected = answers[q.id] === oIdx;
+                {question.options.map((option: string, optionIndex: number) => {
+                  const isSelected = answers[question.id] === optionIndex;
                   return (
                     <button
-                      key={oIdx}
-                      onClick={() => handleSelectOption(q.id, oIdx)}
+                      key={optionIndex}
+                      onClick={() => handleSelectOption(question.id, optionIndex)}
                       className={`w-full text-left p-4 rounded-xl border-2 transition-all flex items-center gap-4 hover:border-primary/40 ${isSelected ? 'border-primary bg-primary/5 shadow-sm' : 'border-border bg-background'}`}
                     >
                       <div className={`w-7 h-7 rounded-full flex items-center justify-center text-sm font-medium border-2 transition-colors ${isSelected ? 'border-primary bg-primary text-primary-foreground' : 'border-muted-foreground/30 text-muted-foreground'}`}>
-                        {String.fromCharCode(65 + oIdx)}
+                        {String.fromCharCode(65 + optionIndex)}
                       </div>
-                      <span className={`${isSelected ? 'font-medium text-foreground' : 'text-foreground/80'}`}>{opt}</span>
+                      <span className={`${isSelected ? 'font-medium text-foreground' : 'text-foreground/80'}`}>{option}</span>
                     </button>
                   );
                 })}

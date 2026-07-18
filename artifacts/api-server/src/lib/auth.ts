@@ -1,18 +1,19 @@
 import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
 
-const JWT_SECRET = process.env["JWT_SECRET"];
-
 export interface AdminTokenPayload {
   adminId: number;
   username: string;
 }
 
+// Read JWT_SECRET fresh from process.env on every call so tests can set it
+// after module load without needing a restart.
 function getSecret(): string {
-  if (!JWT_SECRET) {
+  const secret = process.env["JWT_SECRET"];
+  if (!secret) {
     throw new Error("JWT_SECRET environment variable is required but was not provided.");
   }
-  return JWT_SECRET;
+  return secret;
 }
 
 export function signAdminToken(payload: AdminTokenPayload): string {

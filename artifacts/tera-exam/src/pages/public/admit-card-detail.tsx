@@ -78,7 +78,7 @@ export default function AdmitCardDetail() {
                   <Info className="h-5 w-5 text-muted-foreground" /> Instructions & Details
                 </h3>
                 <div className="prose prose-slate dark:prose-invert max-w-none text-muted-foreground text-sm">
-                  {item.description.split('\n').map((paragraph, idx) => (
+                  {item.description.split('\n').map((paragraph: string, idx: number) => (
                     paragraph ? <p key={idx}>{paragraph}</p> : <br key={idx} />
                   ))}
                 </div>

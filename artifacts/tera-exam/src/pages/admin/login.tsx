@@ -35,7 +35,7 @@ export default function AdminLogin() {
   const onSubmit = async (data: LoginFormValues) => {
     setError(null);
     loginMutation.mutate({ data }, {
-      onSuccess: (res) => {
+      onSuccess: (res: { token: string }) => {
         localStorage.setItem("tera_exam_admin_token", res.token);
         // Force reload or redirect to dashboard
         setLocation("/admin");

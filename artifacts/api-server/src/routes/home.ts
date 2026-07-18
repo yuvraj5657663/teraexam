@@ -7,6 +7,11 @@ const router: IRouter = Router();
 
 const LATEST_LIMIT = 6;
 
+type JobRow = (typeof jobsTable.$inferSelect);
+type ResultRow = (typeof resultsTable.$inferSelect);
+type AdmitCardRow = (typeof admitCardsTable.$inferSelect);
+type SyllabusRow = (typeof syllabusTable.$inferSelect);
+
 router.get("/home/summary", async (_req, res): Promise<void> => {
   const [latestJobs, latestResults, latestAdmitCards, latestSyllabus] = await Promise.all([
     db
@@ -36,18 +41,18 @@ router.get("/home/summary", async (_req, res): Promise<void> => {
   ]);
 
   const tickerItems = [
-    ...latestJobs.map((j) => ({ id: `job-${j.id}`, type: "job", title: j.title, link: `/jobs/${j.id}` })),
-    ...latestResults.map((r) => ({
-      id: `result-${r.id}`,
+    ...latestJobs.map((job: JobRow) => ({ id: `job-${job.id}`, type: "job", title: job.title, link: `/jobs/${job.id}` })),
+    ...latestResults.map((result: ResultRow) => ({
+      id: `result-${result.id}`,
       type: "result",
-      title: r.title,
-      link: `/results/${r.id}`,
+      title: result.title,
+      link: `/results/${result.id}`,
     })),
-    ...latestAdmitCards.map((a) => ({
-      id: `admit-card-${a.id}`,
+    ...latestAdmitCards.map((admitCard: AdmitCardRow) => ({
+      id: `admit-card-${admitCard.id}`,
       type: "admit_card",
-      title: a.title,
-      link: `/admit-cards/${a.id}`,
+      title: admitCard.title,
+      link: `/admit-cards/${admitCard.id}`,
     })),
   ];
 

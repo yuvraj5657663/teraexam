@@ -74,7 +74,7 @@ export default function ResultDetail() {
             </h3>
             {result.description ? (
               <div className="prose prose-slate dark:prose-invert max-w-none text-muted-foreground">
-                {result.description.split('\n').map((paragraph, idx) => (
+                {result.description.split('\n').map((paragraph: any, idx: any) => (
                   paragraph ? <p key={idx}>{paragraph}</p> : <br key={idx} />
                 ))}
               </div>

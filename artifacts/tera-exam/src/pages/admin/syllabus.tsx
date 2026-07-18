@@ -32,7 +32,9 @@ export default function AdminSyllabus() {
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
-  const { data: items = [], isLoading } = useAdminListSyllabus({ search: search || undefined });
+  const { data, isLoading } = useAdminListSyllabus({ search: search || undefined });
+  // API returns { data: [...], pagination: {...} } but generated types still say array
+  const items = (data as any)?.data ?? data ?? [];
   
   const createMutation = useCreateSyllabus();
   const updateMutation = useUpdateSyllabus();
@@ -101,7 +103,7 @@ export default function AdminSyllabus() {
     }
   };
 
-  const openEdit = (item: any) => {
+  const openEdit = (item: { id: number; examName: string; title: string; pdfUrl: string; description?: string | null; status: "draft" | "published" }) => {
     setEditingId(item.id);
     form.reset({
       ...item,
@@ -183,7 +185,7 @@ export default function AdminSyllabus() {
             ) : items.length === 0 ? (
               <TableRow><TableCell colSpan={5} className="text-center py-8 text-muted-foreground">No syllabus found</TableCell></TableRow>
             ) : (
-              items.map((item) => (
+              items.map((item: any) => (
                 <TableRow key={item.id}>
                   <TableCell className="font-medium text-foreground">{item.title}</TableCell>
                   <TableCell className="text-muted-foreground">{item.examName}</TableCell>
