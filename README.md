@@ -21,11 +21,6 @@ TeraExam ek high-performance aur scalable online examination portal hai, jise mo
 
 ---
 
-## 💻 Getting Started (Local Setup)
 
-Project ko apne local system par run karne ke liye in steps ko follow karein:
 
-### 1. Repository Clone Karein
-```bash
-git clone [https://github.com/yuvraj5657663/teraexam.git](https://github.com/yuvraj5657663/teraexam.git)
-cd teraexam
+
